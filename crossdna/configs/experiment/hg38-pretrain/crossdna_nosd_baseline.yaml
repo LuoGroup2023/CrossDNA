@@ -1,0 +1,106 @@
+# @package _global_
+defaults:
+  - /pipeline: bert_hg38
+  - override /scheduler: cosine_warmup_timm
+
+model:
+  _name_: crossdna_nosd_baseline      
+  pretrain: true
+  use_s_scan: true
+  for_representation: false
+
+  # 结构与原版一致
+  use_bridge: true
+  bridge_dropout: 0.1                
+  use_mem: false
+
+  # —— 无教师：以下全部默认关闭 ——
+  use_rc_kl: false
+  use_barlow: false
+  use_tv: false
+  sem_max_weight: 0.0
+  sem_warmup_steps: 0
+  aux_ce_weight: 0.0
+  gate_sup_weight: 0.0
+  gate_sup_warmup_steps: 0
+
+  # 主干维度与深度
+  alphabet_size: 5
+  d_model: 128
+  block_size: 1024
+  depth: 6
+  drop_path_rates: [0.0, 0.05]
+  dropout: 0.15
+  gate_freeze_steps: 3000
+  detach_gate: false
+  gate_temp: 2.0
+
+  transformer_cfg:
+    hidden_size: 128
+    norm_eps: 1e-5
+    max_position_embeddings: ${dataset.max_length}
+    hidden_ratio: 4.0
+    hidden_act: "swish"
+    fuse_swiglu: true
+    attn:
+      num_heads: 8
+      num_kv_heads: 8
+      qkv_bias: false
+      window_size: 512
+      rope_theta: 10000
+
+  comba_cfg:
+    hidden_size: 128
+    expand_v: 1
+    head_dim: 64
+    num_heads: 8
+    use_gate: true
+    mode: 'chunk'
+    use_short_conv: true
+    correction_factor: 0.02
+    conv_size: 4
+    norm_eps: 1e-5
+
+task:
+  _name_: hg38
+  loss: bert_cross_entropy_with_DualStrandNoTeacher
+  metrics: [ "ppl" ]
+
+trainer:
+  accelerator: gpu
+  devices: 1
+  num_nodes: 1
+  accumulate_grad_batches: ${div_up:${train.global_batch_size}, ${eval:${trainer.devices} * ${dataset.batch_size} * ${trainer.num_nodes}}}
+  max_epochs: 60
+  precision: 32
+  gradient_clip_val: 1.0
+
+dataset:
+  batch_size: 75
+  max_length: 2048
+  max_length_val: ${dataset.max_length}
+  max_length_test: ${dataset.max_length}
+  tokenizer_name: char
+  use_tokenizer: false
+  add_eos: true
+  rc_aug: false
+  num_workers: 17
+  use_fixed_len_val: false
+  replace_N_token: false
+  pad_interval: false
+
+scheduler:
+  t_in_epochs: False
+  t_initial: ${eval:${div_up:${dataset.__train_len}, ${train.global_batch_size}} * ${trainer.max_epochs}}
+  warmup_lr_init: 1e-6
+  warmup_t: ${eval:${div_up:${dataset.__train_len}, ${train.global_batch_size}} * ${trainer.max_epochs} * 0.01}
+  lr_min: ${eval:0.1 * ${optimizer.lr}}
+
+optimizer:
+  lr: 1e-3
+  weight_decay: 0.0
+
+train:
+  gpu_mem: ${eval:"round(float(__import__('subprocess').check_output('nvidia-smi -i 0 --query-gpu=memory.total --format=csv,noheader,nounits', shell=True).strip().decode()) / 1000)"}
+  seed: 2222
+  global_batch_size: ${eval:${trainer.devices}*${dataset.batch_size}}

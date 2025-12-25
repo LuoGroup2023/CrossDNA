@@ -1,0 +1,74 @@
+{
+  "_name_or_path": "CrossDNA-pretrain",
+  "model_type": "crossdna",
+  "architectures": ["CrossDNAForMaskedLM"],
+
+  "auto_map": {
+    "AutoConfig": "configuration_crossdna.CrossDNAConfig",
+    "AutoModelForMaskedLM": "modeling_crossdna.CrossDNAForMaskedLM",
+    "AutoTokenizer": "tokenization_crossdna.CrossDNATokenizer"
+  },
+
+  "torch_dtype": "float32",
+
+  "alphabet_size": 5,
+  "d_model": 128,
+  "block_size": 1024,
+  "depth": 6,
+  "drop_path_rates": [0.0, 0.05],
+  "dropout": 0.15,
+
+  "pretrain": true,
+  "for_representation": false,
+  "use_s_scan": true,
+  "use_bridge": true,
+  "use_mem": false,
+  "use_rc_kl": false,
+  "use_barlow": false,
+  "use_tv": false,
+
+  "sem_max_weight": 0.12,
+  "sem_warmup_steps": 10000,
+  "aux_ce_weight": 0.0,
+  "gate_freeze_steps": 5000,
+  "detach_gate": false,
+  "gate_sup_weight": 0.02,
+  "gate_sup_warmup_steps": 500,
+  "gate_temp": 2.0,
+
+  "transformer_cfg": {
+    "hidden_size": 128,
+    "norm_eps": 1e-5,
+    "max_position_embeddings": 1024,
+    "hidden_ratio": 4.0,
+    "hidden_act": "swish",
+    "fuse_swiglu": true,
+    "attn": {
+      "num_heads": 8,
+      "num_kv_heads": 8,
+      "qkv_bias": false,
+      "window_size": 512,
+      "rope_theta": 10000
+    }
+  },
+  "comba_cfg": {
+    "hidden_size": 128,
+    "expand_v": 1,
+    "head_dim": 64,
+    "num_heads": 8,
+    "use_gate": true,
+    "mode": "chunk",
+    "use_short_conv": true,
+    "correction_factor": 0.02,
+    "conv_size": 4,
+    "norm_eps": 1e-5
+  },
+
+  "pad_token_id": 4,
+  "bos_token_id": 2,
+  "sep_token_id": 1,
+  "cls_token_id": 0,
+  "mask_token_id": 3,
+
+  "vocab_size": 5
+}

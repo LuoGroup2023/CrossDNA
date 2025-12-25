@@ -1,0 +1,108 @@
+# @package _global_
+defaults:
+  - /pipeline: genomic_benchmark
+  - override /scheduler: cosine_warmup_timm
+
+model:
+  _name_: convnovaPro
+  for_representation: true
+  alphabet_size: 7  # 如果定义甲基化此处需要变化ATGCN变为ATGCPQN:5->7
+  d_model: 64
+  kernel_size: 9
+  dilation: 4
+  pretrain: False
+  num_conv1d: 4
+  d_inner: 2
+  final_conv: False
+  ffn: false
+  args:
+    hidden_dim: 64 # same as d_model
+    num_cnn_stacks: 1
+    dropout: 0.0
+  comba_args:
+    hidden_size: 64 # same as d_model
+    expand_v: 1
+    head_dim: 64 # same as d_model
+    num_heads: 4
+    use_gate: True
+    mode: 'chunk'
+    use_short_conv: True
+    correction_factor: 0.02
+    conv_size: 4
+    norm_eps: 1e-5
+
+# decoder: null
+
+task:
+  # 2 options for soft_cross_entropy (for mixup)
+  _name_: multiclass
+  loss: cross_entropy
+    # soft_cross_entropy for pytorch 1.10+, which takes in label_smoothing here_name_: cross_entropy
+    # label_smoothing: 0.1
+  # pass in list of k's
+  # last_k_ppl: null
+
+trainer:
+  accelerator: gpu
+  devices: 1
+  num_nodes: 1
+  accumulate_grad_batches: ${div_up:${train.global_batch_size}, ${eval:${trainer.devices} * ${dataset.batch_size} * ${trainer.num_nodes}}}
+  max_epochs: 20
+  precision: 32  # bf16 only a100
+  gradient_clip_val: 1.0
+  # strategy: null
+
+# there are 8 datasets in this suite, choose 1 at a time, with their corresponding settings
+# name                                num_seqs        num_classes     median len    std
+# dummy_mouse_enhancers_ensembl       1210            2               2381          984.4  
+# demo_coding_vs_intergenomic_seqs    100_000         2               200           0
+# demo_human_or_worm                  100_000         2               200           0
+# human_enhancers_cohn                27791           2               500           0
+# human_enhancers_ensembl             154842          2               269           122.6
+# human_ensembl_regulatory            289061          3               401           184.3
+# human_nontata_promoters             36131           2               251           0
+# human_ocr_ensembl                   174756          2               315           108.1
+
+# decoder: null
+
+dataset:
+  batch_size: 50
+  max_length: 2048 # select max that you want for this dataset
+  dataset_name: 'demo_coding_vs_intergenomic_seqs'
+  dest_path: /home/yangc/Projects/Baseline/ConvNova/convnova/data/genomic_benchmark/ # 'project_root/data/genomic_benchmark/'
+  d_output: 2  # binary classification by default
+  use_padding: True
+  padding_side: 'left'
+  add_eos: False
+  train_len: 100000  # update this according to above table
+  __l_max: ${.max_length}
+  tokenizer_name: char
+  use_tokenizer: False
+  # rc_aug: true  # reverse complement augmentation.  Didn't seem to help for human_nontata_promoters, but could be wrong
+
+scheduler:
+  t_in_epochs: False
+  t_initial: ${eval:${div_up:${dataset.train_len}, ${train.global_batch_size}} * ${trainer.max_epochs}}
+  warmup_lr_init: 1e-6
+  warmup_t: ${eval:${div_up:${dataset.train_len}, ${train.global_batch_size}} * ${trainer.max_epochs} * 0.01}
+  lr_min: ${eval:0.1 * ${optimizer.lr}}
+
+optimizer:
+  lr: 1e-3
+  weight_decay: 0.1
+
+train:
+  gpu_mem: ${eval:"round(float(__import__('subprocess').check_output('nvidia-smi -i 0 --query-gpu=memory.total --format=csv,noheader,nounits', shell=True).strip().decode()) / 1000)"}
+  seed: 43
+  global_batch_size: ${eval:${trainer.devices}*${dataset.batch_size}}
+  remove_test_loader_in_eval: true  # no test set in this benchmark
+  pretrained_model_strict_load: False  # false allows encoder/decoder to be used if new model uses it
+  # for loading backbone and not head, requires both of these flags below
+#  pretrained_model_path: '/home/yangc/Projects/Baseline/ConvNova/convnova/outputs/2025-06-22/22-20-43-812075/checkpoints/test/loss.ckpt'  # 自己设计的模型最优保存
+#  pretrained_model_path: '/home/yangc/Projects/Baseline/ConvNova/convnova/outputs/2025-06-19/21-29-10-607735/checkpoints/test/loss.ckpt' # 原来的模型预训练
+#  pretrained_model_path: '/home/yangc/Projects/Baseline/ConvNova/convnova/outputs/2025-06-28/23-24-10-138477/checkpoints/test/loss.ckpt' # 加了曲率
+#  pretrained_model_path: '/home/yangc/Projects/Baseline/ConvNova/convnova/outputs/2025-06-29/18-40-50-634896/checkpoints/test/loss.ckpt'  # 去掉傅里叶
+  pretrained_model_path: '/home/yangc/Projects/Baseline/ConvNova/convnova/outputs/2025-07-21/15-25-26-642489/checkpoints/test/loss.ckpt'  # 加了甲基化token
+  pretrained_model_state_hook:
+    _name_: load_backbone
+    freeze_backbone: false  # seems to work much better if false (ie finetune entire model)

@@ -1,0 +1,134 @@
+# config_pretrain_export.yaml
+
+model:
+  _name_: crossdna
+  pretrain: false
+  use_s_scan: true
+  for_representation: true
+
+  use_bridge: true
+  bridge_dropout: 0.1
+  use_ema_teacher: false
+  use_final_conv: false
+  use_mem: false
+  use_rc_kl: false
+  use_barlow: false
+  use_tv: false
+
+  alphabet_size: 5
+  d_model: 128
+  block_size: 1024
+  depth: 6
+  drop_path_rates: [0.0, 0.05]
+  dropout: 0.15
+
+  sem_max_weight: 0.12
+  sem_warmup_steps: 10000
+  aux_ce_weight: 0.0
+
+  gate_freeze_steps: 3000
+  detach_gate: false
+  gate_sup_weight: 0.02
+  gate_sup_warmup_steps: 500
+  gate_temp: 2.0
+
+  transformer_cfg:
+    hidden_size: 128
+    norm_eps: 1e-5
+    max_position_embeddings: 2048
+    hidden_ratio: 4.0
+    hidden_act: "swish"
+    fuse_swiglu: true
+    attn:
+      num_heads: 8
+      num_kv_heads: 8
+      qkv_bias: false
+      window_size: 512
+      rope_theta: 10000
+
+  comba_cfg:
+    hidden_size: 128
+    expand_v: 1
+    head_dim: 64
+    num_heads: 8
+    use_gate: true
+    mode: "chunk"
+    use_short_conv: true
+    correction_factor: 0.02
+    conv_size: 4
+    norm_eps: 1e-5
+
+encoder: id
+
+# 仅为顺利实例化而设的占位 decoder；脚本不会使用 decoder
+decoder:
+  _name_: stop
+
+task:
+  _name_: masked_multiclass
+  loss: cross_entropy
+  torchmetrics: null
+  metrics: null
+
+dataset:
+  _name_: nucleotide_transformer
+  dataset_name: "enhancer"            # 占位，不会真正 setup（因为 disable_dataset）
+  dest_path: "/gpfs/essfs/zhaol/data/NT_benchmark"
+  tokenizer_name: char
+  use_tokenizer: true
+  d_output: 2
+  max_length: 200
+  max_length_val: 200
+  use_padding: true
+  add_eos: false
+  rc_aug: false
+  return_mask: true
+  batch_size: 120
+  batch_size_eval: 120
+  num_workers: 2
+  shuffle: false
+  shuffle_eval: false
+  pin_memory: true
+  drop_last: false
+
+loader:
+  batch_size: 120
+  num_workers: 2
+  pin_memory: true
+  drop_last: false
+  shuffle: false
+
+trainer:
+  _target_: pytorch_lightning.Trainer
+  accelerator: gpu
+  devices: 1
+  precision: 32
+  max_epochs: 1
+  logger: false
+  enable_checkpointing: false
+
+optimizer:
+  _name_: adamw
+  lr: 1.0e-3
+  weight_decay: 0.1
+
+train:
+  seed: 48
+  disable_dataset: true      # 关键：不执行 dataset.setup()
+  global_batch_size: 120
+  ema: 0.0
+  validate_at_start: false
+  interval: epoch
+  ckpt: null
+  test: false
+  state:
+    mode: null
+    n_context: 0
+    n_context_eval: 0
+  post_init_hook:
+    _name_: null
+  pretrained_model_state_hook:
+    _name_: null
+  layer_decay:
+    _name_: null
+    decay: 1.0

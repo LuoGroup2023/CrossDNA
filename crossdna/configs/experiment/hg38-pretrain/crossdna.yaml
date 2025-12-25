@@ -1,0 +1,130 @@
+# @package _global_
+defaults:
+  - /pipeline: bert_hg38
+  - override /scheduler: cosine_warmup_timm
+
+model:
+  _name_: crossdna
+  pretrain: true
+  use_s_scan: true
+  for_representation: false
+
+  use_bridge: true                 # 启用 TokenBridge
+  bridge_dropout: 0.1             # 先设 0，稳定后可升到 0.05
+
+  use_mem: False
+  use_rc_kl: False     # 先关
+  use_barlow: False    # 先关
+  use_tv: False       # 先关
+  alphabet_size: 5  # ATCGN
+  d_model: 128  # 512
+  block_size: 1024
+  depth: 6 
+  drop_path_rates: [ 0.0, 0.05 ]
+  sem_max_weight: 0.12
+  sem_warmup_steps: 10000
+  aux_ce_weight: 0.0
+  gate_freeze_steps: 5000
+  detach_gate: False  # 二选一：冻结 or 切断，先同时开更稳
+  dropout: 0.15
+
+  gate_sup_weight: 0.02
+  gate_sup_warmup_steps: 1000
+  gate_temp: 2.0
+
+
+  transformer_cfg:
+
+    # SWA+MLP
+    hidden_size: 128 # 512
+    norm_eps: 1e-5
+    max_position_embeddings: ${dataset.max_length}
+    hidden_ratio: 4.0
+    hidden_act: "swish"
+    fuse_swiglu: True
+    attn:
+      num_heads: 8 # 8
+      num_kv_heads: 8 # 8
+      qkv_bias: False
+      window_size: 512  # 1024用的512
+      rope_theta: 10000
+
+
+  comba_cfg:
+    hidden_size: 128  # 512 # same as d_model
+    expand_v: 1
+    head_dim: 64  # 64 # same as d_model
+    num_heads: 8  # 8
+    use_gate: True
+    mode: 'chunk'
+    use_short_conv: True
+    correction_factor: 0.02
+    conv_size: 4
+    norm_eps: 1e-5
+
+
+task:
+  # _name_: lm
+  _name_: hg38  # equivalent to lm task, plus allows extra metrics to be calculated
+  loss: bert_cross_entropy_with_semantic_and_dual # bert_cross_entropy bert_cross_entropy_with_semantic_and_dual  bert_cross_entropy_with_semantic_and_dual_dankai  bert_cross_entropy_with_DualStrandNoCrossNoTokenBridge
+  metrics: [ "ppl" ]
+
+trainer:
+  accelerator: gpu
+  devices: 1
+  num_nodes: 1
+  accumulate_grad_batches: ${div_up:${train.global_batch_size}, ${eval:${trainer.devices} * ${dataset.batch_size} * ${trainer.num_nodes}}}
+  max_epochs: 60   # 单卡60 多卡30 (4张A800)
+  precision: 32  # bf16 only a100
+  gradient_clip_val: 1.0
+  # strategy: null
+
+dataset:
+  batch_size: 150 # 30  # Per GPU 128  150 # 多卡训练故障测试：单卡30，多卡60(4张A800)
+  max_length: 1024 # 4096 # 153,600(大约2的17次方) 262144(2的18次方), 524288(2的19次方) 1,048,576(2的20次方) 16384(2 的 14 次方, 也就是16K) 122880 单卡 4096 多卡(4张A800) 2048 
+  # optional, default is max_length
+  max_length_val: ${dataset.max_length}
+  max_length_test: ${dataset.max_length}
+  tokenizer_name: char
+  use_tokenizer: False
+  pad_max_length: null  # needed for bpe tokenizer
+  add_eos: true
+  rc_aug: false
+  num_workers: 30
+  use_fixed_len_val: false  # placing a fixed length val here, but it's really the test
+  replace_N_token: false  # replace N (uncertain token) with pad tokens in dataloader
+  pad_interval: false  # handle uncertain tokens within the FastaInteral class
+
+scheduler:
+  t_in_epochs: true
+  t_initial: ${trainer.max_epochs}
+  warmup_t: ${eval:${div_up:${dataset.__train_len}, ${train.global_batch_size}} * ${trainer.max_epochs} * 0.01}
+  warmup_lr_init: 1e-6
+  lr_min: ${eval:0.1 * ${optimizer.lr}}
+
+optimizer:
+  _name_: adamw
+  lr: 1e-4 #单卡1.5e-3 多卡1e-4
+  weight_decay: 0.1
+
+train:
+  gpu_mem: ${eval:"round(float(__import__('subprocess').check_output('nvidia-smi -i 0 --query-gpu=memory.total --format=csv,noheader,nounits', shell=True).strip().decode()) / 1000)"}
+  seed: 2222
+  global_batch_size: ${eval:${trainer.devices} * ${dataset.batch_size} * ${trainer.num_nodes}}  # effects the scheduler, need to set properly
+
+
+wandb:
+  project: CrossDNA
+  group: crossdna_hg38_pretrain
+  job_type: training
+  mode: online # choices=['online', 'offline', 'disabled']
+  name: gpu_nums-${trainer.devices}_crossdna_len-${dataset.max_length}_d_model-${model.d_model}_n_layer-${model.depth}_lr-${optimizer.lr}_numofcombaheads-${model.comba_cfg.num_heads}_combadim-${model.comba_cfg.head_dim}_numofSWAheads-${model.transformer_cfg.attn.num_heads}_bs-${train.global_batch_size}_dp-${model.dropout}_dpb-${model.drop_path_rates[1]}_bridge-${model.use_bridge}_mem-${model.use_mem}_rc-aug-${dataset.rc_aug}_for-rep-${model.for_representation}
+  id: 
+  resume: auto # pass correct id to resume experiment!
+
+hydra:
+  run:
+    dir: ./outputs/pretrain/hg38/${now:%Y-%m-%d}/${now:%H-%M-%S-%f}
+  job:
+    chdir: true
+

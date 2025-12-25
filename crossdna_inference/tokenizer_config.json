@@ -1,0 +1,32 @@
+{
+  "char_ords": [65, 67, 71, 84, 78], 
+  "model_max_length": 1024,
+
+  "add_prefix_space": false,
+  "padding_side": "left",
+
+  "bos_token": "[BOS]",
+  "eos_token": "[SEP]",
+  "sep_token": "[SEP]",
+  "cls_token": "[CLS]",
+  "pad_token": "[PAD]",
+  "mask_token": "[MASK]",
+  "unk_token": "[UNK]",
+
+  "added_tokens_decoder": {
+    "0":  { "content": "[CLS]", "lstrip": false, "normalized": false, "rstrip": false, "single_word": false, "special": true },
+    "1":  { "content": "[SEP]", "lstrip": false, "normalized": false, "rstrip": false, "single_word": false, "special": true },
+    "2":  { "content": "[BOS]", "lstrip": false, "normalized": false, "rstrip": false, "single_word": false, "special": true },
+    "3":  { "content": "[MASK]", "lstrip": true,  "normalized": false, "rstrip": false, "single_word": false, "special": true },
+    "4":  { "content": "[PAD]", "lstrip": false, "normalized": false, "rstrip": false, "single_word": false, "special": true },
+    "6":  { "content": "[UNK]", "lstrip": false, "normalized": false, "rstrip": false, "single_word": false, "special": true }
+  },
+
+  "tokenizer_class": "CrossDNATokenizer",
+  "auto_map": {
+    "AutoTokenizer": [
+      "tokenization_crossdna.CrossDNATokenizer",
+      null
+    ]
+  }
+}
