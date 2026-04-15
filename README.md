@@ -14,8 +14,8 @@
 
 <h3>1.1 Clone the repo and switch to the crossdnav2 branch.</h3>
 <pre>
-git clone -b crossdnav2 https://github.com/LuoGroup2023/CrossDNA.git
-cd CrossDNA
+git clone -b crossdnav2 https://github.com/LuoGroup2023/CrossDNA.git CrossDNAv2
+cd CrossDNAv2
 </pre>
 
 
@@ -135,5 +135,6 @@ To benchmark the embedding quality of DNA foundation models, we used the DNA Fou
 ## Contact
   - **Cheng Yang**: [yangchengyjs@hnu.edu.cn](mailto:[yangchengyjs@hnu.edu.cn)
   College of Computer Science and Electronic Engineering, Hunan University, Changsha
+
 
 
