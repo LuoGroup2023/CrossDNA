@@ -11,6 +11,10 @@
 - [x] Source Code and Pretrained Weights on transformers.
 ---
 
+## Update
+- **2026-04-15**: The new version of CrossDNA is available in the `crossdnav2` branch.Under the same parameter setting and without changing the CrossDNA architecture, we further optimized the training process by making more efficient use of intermediate variables and improving memory utilization. These changes substantially reduced memory pressure and redundant computation during training, leading to more stable optimization and better downstream performance of CrossDNA.
+
+
 <h2>1 Quick start</h2>
 
 <h3>1.1 Clone the repo and cd CrossDNA/crossdna.</h3>
