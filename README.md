@@ -1,5 +1,12 @@
 # Explicit Dynamic Cross-Strand Interactions for DNA Sequence Language Modeling
 
+## Overview
+
+This repository contains the official implementation of **CrossDNA**, a DNA sequence language model designed for explicit and dynamic cross-strand representation learning. CrossDNA uses a duplex-inspired dual-branch architecture to model forward and reverse-complement DNA views, together with lightweight cross-strand communication and long-context sequence modeling modules.
+
+The repository provides source code, configuration files, pretrained model weights, and example scripts for pretraining CrossDNA, fine-tuning it on downstream genomic benchmarks, and extracting sequence-level representations. It can be used to reproduce the experiments reported in our study, train CrossDNA on custom genomic sequences, or load pretrained CrossDNA models for downstream tasks such as genomic sequence classification, enhancer prediction, chromatin profile prediction, and embedding-based analysis.
+
+Pretrained CrossDNA model variants are also available through Hugging Face, and this README provides instructions for environment setup, data preparation, model training, benchmark reproduction, and model loading.
 
 ---
 
