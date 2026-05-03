@@ -78,40 +78,40 @@ The final file structure (data directory) should look like
 
 <p>The recommended entry point is the pre-training script under <code>scripts/pre_train</code>. Before running, please update the environment-specific paths in the script, such as <code>conda</code>, <code>full_path_to_root</code>, and the output directory.</p>
 <pre>
-  bash scripts/pre_train/CrossDNAv2_2k.sh
+  bash scripts/pre_train/CrossDNA_2k.sh
 </pre>
 
-<p>This script launches <code>experiment=hg38-pretrain/crossdnav2</code> with the default 2k pre-training setup. You can edit variables such as <code>SEQLEN</code>, <code>BLOCK_SIZE</code>, <code>BATCH_SIZE</code>, <code>D_MODEL</code>, <code>Depth</code>, <code>LR</code>, and <code>MAX_EPOCHES</code> directly in the script.</p>
+<p>This script launches <code>experiment=hg38-pretrain/crossdna</code> with the default 2k pre-training setup. You can edit variables such as <code>SEQLEN</code>, <code>BLOCK_SIZE</code>, <code>BATCH_SIZE</code>, <code>D_MODEL</code>, <code>Depth</code>, <code>LR</code>, and <code>MAX_EPOCHES</code> directly in the script.</p>
 
 <h3>2.2 Genomic Benchmarks</h3>
 <p>GenomicBenchmarks provides 8 binary- and multi-class tasks packaged as a Python library.</p>
-<p>The recommended launch script is <code>scripts/benchmark/gb/gb_crossdnav2.sh</code>. Please update the checkpoint path and dataset root in the script, or pass them from the command line.</p>
+<p>The recommended launch script is <code>scripts/benchmark/gb/gb_crossdna.sh</code>. Please update the checkpoint path and dataset root in the script, or pass them from the command line.</p>
 <pre>
-  bash scripts/benchmark/gb/gb_crossdnav2.sh human_enhancers_cohn
+  bash scripts/benchmark/gb/gb_crossdna.sh human_enhancers_cohn
 </pre>
 
 <p>Optional override:</p>
 <pre>
-  bash scripts/benchmark/gb/gb_crossdnav2.sh human_enhancers_cohn /path/to/pretrain.ckpt /path/to/genomic_benchmark
+  bash scripts/benchmark/gb/gb_crossdna.sh human_enhancers_cohn /path/to/pretrain.ckpt /path/to/genomic_benchmark
 </pre>
 
 <p>An additional 408K/tiny-backbone variant is also provided:</p>
 <pre>
-  bash scripts/benchmark/gb/gb_crossdnav2_408k.sh human_enhancers_cohn /path/to/pretrain_408k.ckpt /path/to/genomic_benchmark
+  bash scripts/benchmark/gb/gb_crossdna_408k.sh human_enhancers_cohn /path/to/pretrain_408k.ckpt /path/to/genomic_benchmark
 </pre>
 
 <p>Task-specific <code>MAX_LENGTH</code>, <code>BATCH_SIZE</code>, and <code>LR</code> are selected automatically inside the script according to <code>DATASET_NAME</code>.</p>
 
 <h3>2.3 Nucleotide Transformer Benchmark</h3>
 <p>Datasets are hosted on the Hub as <code>InstaDeepAI/nucleotide_transformer_downstream_tasks</code>.</p>
-<p>The recommended launch script is <code>scripts/benchmark/nt/nt_crossdnav2.sh</code>. Please update the checkpoint path and dataset root in the script, or pass them from the command line.</p>
+<p>The recommended launch script is <code>scripts/benchmark/nt/nt_crossdna.sh</code>. Please update the checkpoint path and dataset root in the script, or pass them from the command line.</p>
 <pre>
-  bash scripts/benchmark/nt/nt_crossdnav2.sh H3K4me3
+  bash scripts/benchmark/nt/nt_crossdna.sh H3K4me3
 </pre>
 
 <p>Optional override:</p>
 <pre>
-  bash scripts/benchmark/nt/nt_crossdnav2.sh H3K4me3 /path/to/pretrain.ckpt /path/to/nucleotide_transformer
+  bash scripts/benchmark/nt/nt_crossdna.sh H3K4me3 /path/to/pretrain.ckpt /path/to/nucleotide_transformer
 </pre>
 
 <p>Task-specific <code>BATCH_SIZE</code> and <code>LR</code> are configured inside the script for each NT dataset.</p>
