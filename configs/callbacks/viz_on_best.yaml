@@ -1,0 +1,11 @@
+# @package _global_
+callbacks:
+  viz_on_best:
+    monitor: ${train.monitor}
+    mode: ${train.mode}
+    out_dir: ${hydra:run.dir}/viz
+    filename_pattern: "tokens_epoch{epoch:03d}_step{step}.npz"
+    stride: 4
+    max_per_class: 40000
+    project_to_common_dim: 128   # 如不合图可设 null
+    limit_batches: 20          # 或者 20 做快速导出
