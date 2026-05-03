@@ -97,7 +97,7 @@ def rc_consistency_bidirectional_stopgrad(logits_A, logits_B_fwd, P, tau: float 
 # ========================
 # Barlow & TV（可选）
 # ========================
-def barlow_strand_loss_v2(z1, z2, λ_off=0.04, λ_diag=0.04, eps=1e-3):
+def barlow_strand_loss(z1, z2, λ_off=0.04, λ_diag=0.04, eps=1e-3):
     
     B, L, H = z1.shape
     n = B * L
@@ -694,7 +694,7 @@ class SSScanDNAHybridModel(nn.Module):
                         total_aux = total_aux + w_rc * rc
 
                     if self.use_barlow:
-                        total_aux = total_aux + barlow_strand_loss_v2(H_A, H_B)
+                        total_aux = total_aux + barlow_strand_loss(H_A, H_B)
                     if self.use_tv:
                         total_aux = total_aux + tv_mixed(fused_blk)
 

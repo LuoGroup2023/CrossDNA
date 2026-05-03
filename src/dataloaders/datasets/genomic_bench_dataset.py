@@ -51,7 +51,7 @@ def _read_sequence_file(path: Path) -> str:
 
 class GenomicBenchmarkDataset(torch.utils.data.Dataset):
     """
-    CrossDNAv2-compatible GenomicBenchmarks dataset.
+    CrossDNA-compatible GenomicBenchmarks dataset.
 
     Key behavior:
     - base-level input
@@ -95,7 +95,7 @@ class GenomicBenchmarkDataset(torch.utils.data.Dataset):
 
         if (not self.use_tokenizer) and self.add_eos:
             raise ValueError(
-                "For CrossDNAv2 fine-tuning with base-level input, "
+                "For CrossDNA fine-tuning with base-level input, "
                 "set add_eos=False when use_tokenizer=False."
             )
 

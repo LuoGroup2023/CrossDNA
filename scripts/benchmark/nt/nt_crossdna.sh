@@ -6,22 +6,22 @@ conda activate CrossDNA
 
 export LD_LIBRARY_PATH=/data/zhaol/miniconda3/envs/CrossDNA/lib/python3.11/site-packages/nvidia/nvjitlink/lib:${LD_LIBRARY_PATH:-}
 
-cd /data/zhaol/projects/yangcheng/CrossDNAv2
-full_path_to_root="/data/zhaol/projects/yangcheng/CrossDNAv2"
+cd /data/zhaol/projects/yangcheng/CrossDNA
+full_path_to_root="/data/zhaol/projects/yangcheng/CrossDNA"
 
 export HYDRA_FULL_ERROR=1
 
 # --------------------------------------------------
 # Default settings
 # You can run:
-#   bash nt_crossdnav2.sh H3K4me3
+#   bash nt_crossdna.sh H3K4me3
 #
 # Optional override:
-#   bash nt_crossdnav2.sh H3K4me3 /new/pretrain.ckpt /new/data/root
+#   bash nt_crossdna.sh H3K4me3 /new/pretrain.ckpt /new/data/root
 # --------------------------------------------------
 
-DEFAULT_PRETRAINED_CKPT="/data/zhaol/projects/yangcheng/CrossDNAv2/outputs/pretrain/hg38/2026-03-10/18-56-11_CrossDNAv2_len-2k_blocksize-2048_gpus-1_batchsize-60_d_model-128_depth-6_lr-3e-4_epoches-60/checkpoints/test/loss.ckpt"
-DEFAULT_DATA_ROOT="/data/zhaol/projects/yangcheng/CrossDNAv2/data/nucleotide_transformer"
+DEFAULT_PRETRAINED_CKPT="/data/zhaol/projects/yangcheng/CrossDNA/outputs/pretrain/hg38/2026-03-10/18-56-11_CrossDNA_len-2k_blocksize-2048_gpus-1_batchsize-60_d_model-128_depth-6_lr-3e-4_epoches-60/checkpoints/test/loss.ckpt"
+DEFAULT_DATA_ROOT="/data/zhaol/projects/yangcheng/CrossDNA/data/nucleotide_transformer"
 
 DATASET_NAME="${1:-H3K9ac_double_strand}"
 PRETRAINED_CKPT="${2:-$DEFAULT_PRETRAINED_CKPT}"
@@ -104,7 +104,7 @@ FREEZE_BACKBONE_EPOCHS=1
 RUN_DATE=$(date +"%Y-%m-%d")
 RUN_TIME=$(date +"%H-%M-%S")
 
-WANDB_NAME="nt_crossdnav2_${DATASET_NAME}_dmodel-${D_MODEL}_depth-${DEPTH}_lr-${LR}_bs-${BATCH_SIZE}"
+WANDB_NAME="nt_crossdna_${DATASET_NAME}_dmodel-${D_MODEL}_depth-${DEPTH}_lr-${LR}_bs-${BATCH_SIZE}"
 HYDRA_RUN_DIR="${full_path_to_root}/outputs/nt_benchmark/${RUN_DATE}/${RUN_TIME}_${WANDB_NAME}"
 WATCH_DIR="${full_path_to_root}/watch_folder/nt_benchmark/${RUN_DATE}"
 
@@ -114,7 +114,7 @@ mkdir -p "${HYDRA_RUN_DIR}"
 mkdir -p "${WATCH_DIR}"
 
 ARGS=(
-    experiment=nt-benchmark/crossdnav2
+    experiment=nt-benchmark/crossdna
 
     dataset.dataset_name=${DATASET_NAME}
     dataset.dest_path=${DATA_ROOT}
@@ -148,7 +148,7 @@ ARGS=(
     train.freeze_backbone_epochs=${FREEZE_BACKBONE_EPOCHS}
 
     wandb.project=CrossDNA-nt-benchmark
-    wandb.group=crossdnav2_nt_finetune
+    wandb.group=crossdna_nt_finetune
     wandb.mode=online
     wandb.id=${WANDBID}
     wandb.name=${WANDB_NAME}

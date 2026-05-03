@@ -406,7 +406,7 @@ def bert_mask(seq, mask_token_id, pad_token_id, vocab_size, mask_prob=0.15, rand
 #         else:
 #             return random_mask(data, self.tokenizer.mask_token_id), target
 
-# v2：DNA 5 类 one-hot
+# DNA 5 类 one-hot
 def dna_bert_mask(
     seq: torch.Tensor,
     mask_prob: float = 0.15,

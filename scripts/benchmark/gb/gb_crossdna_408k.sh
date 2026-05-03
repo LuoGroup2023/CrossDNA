@@ -6,8 +6,8 @@ conda activate CrossDNA
 
 export LD_LIBRARY_PATH=/data/zhaol/miniconda3/envs/CrossDNA/lib/python3.11/site-packages/nvidia/nvjitlink/lib:${LD_LIBRARY_PATH:-}
 
-cd /data/zhaol/projects/yangcheng/CrossDNAv2
-full_path_to_root="/data/zhaol/projects/yangcheng/CrossDNAv2"
+cd /data/zhaol/projects/yangcheng/CrossDNA
+full_path_to_root="/data/zhaol/projects/yangcheng/CrossDNA"
 
 export HYDRA_FULL_ERROR=1
 
@@ -21,8 +21,8 @@ export HYDRA_FULL_ERROR=1
 # --------------------------------------------------
 
 # CrossDNA 408K 预训练模型的ckpt路径
-DEFAULT_PRETRAINED_CKPT="/data/zhaol/projects/yangcheng/CrossDNAv2/outputs/pretrain/hg38/2026-03-10/21-44-56_CrossDNAv2_450K_len-2k_block-1024_gpu-1_bs-60_dmodel-48_depth-3_lr-2e-3/checkpoints/test/loss.ckpt"
-DEFAULT_DATA_ROOT="/data/zhaol/projects/yangcheng/CrossDNAv2/data/genomic_benchmark"
+DEFAULT_PRETRAINED_CKPT="/data/zhaol/projects/yangcheng/CrossDNA/outputs/pretrain/hg38/2026-03-10/21-44-56_CrossDNA_450K_len-2k_block-1024_gpu-1_bs-60_dmodel-48_depth-3_lr-2e-3/checkpoints/test/loss.ckpt"
+DEFAULT_DATA_ROOT="/data/zhaol/projects/yangcheng/CrossDNA/data/genomic_benchmark"
 
 DATASET_NAME="${1:-human_enhancers_cohn}"
 PRETRAINED_CKPT="${2:-$DEFAULT_PRETRAINED_CKPT}"
@@ -106,7 +106,7 @@ NUM_DEVICES=1
 GLOBAL_BATCH_SIZE=${BATCH_SIZE}
 
 # --------------------------------------------------
-# 408K / tiny CrossDNAv2 backbone setting
+# 408K / tiny CrossDNA backbone setting
 # 必须和预训练结构对齐
 # --------------------------------------------------
 D_MODEL=48
@@ -133,7 +133,7 @@ FREEZE_BACKBONE_EPOCHS=4
 RUN_DATE=$(date +"%Y-%m-%d")
 RUN_TIME=$(date +"%H-%M-%S")
 
-WANDB_NAME="gb_crossdnav2_408pm_${DATASET_NAME}_len-${MAX_LENGTH}_dmodel-${D_MODEL}_depth-${DEPTH}_lr-${LR}_bs-${BATCH_SIZE}"
+WANDB_NAME="gb_crossdna_408pm_${DATASET_NAME}_len-${MAX_LENGTH}_dmodel-${D_MODEL}_depth-${DEPTH}_lr-${LR}_bs-${BATCH_SIZE}"
 
 HYDRA_RUN_DIR="${full_path_to_root}/outputs/gb_benchmark/${RUN_DATE}/${RUN_TIME}_${WANDB_NAME}"
 WATCH_DIR="${full_path_to_root}/watch_folder/gb_benchmark/${RUN_DATE}"
@@ -144,7 +144,7 @@ mkdir -p "${HYDRA_RUN_DIR}"
 mkdir -p "${WATCH_DIR}"
 
 ARGS=(
-  experiment=genomic-benchmark/crossdnav2
+  experiment=genomic-benchmark/crossdna
 
   dataset.dataset_name=${DATASET_NAME}
   dataset.dest_path=${DATA_ROOT}
@@ -189,7 +189,7 @@ ARGS=(
   train.pretrained_model_state_hook.freeze_backbone=false
 
   wandb.project=CrossDNA-gb-benchmark
-  wandb.group=crossdnav2_gb_finetune_408pm
+  wandb.group=crossdna_gb_finetune_408pm
   wandb.mode=online
   wandb.id=${WANDBID}
   wandb.name=${WANDB_NAME}

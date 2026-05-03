@@ -27,7 +27,7 @@ from src.utils.config import instantiate, auto_assign_attrs
 from src.models.nn import Activation
 
 
-class FFTConvFuncv2(torch.autograd.Function):
+class FFTConvFunc(torch.autograd.Function):
     @staticmethod
     def forward(ctx, u, k):
         seqlen = u.shape[-1]
@@ -264,7 +264,7 @@ class HyenaFilter(OptimModule):
         else:
             y = fftconv_ref(x, k, bias, dropout_mask=None, gelu=False, bidirectional=self.bidirectional)
             # y = (
-            #     FFTConvFuncv2.apply(x, k.to(dtype=torch.float32))
+            #     FFTConvFunc.apply(x, k.to(dtype=torch.float32))
             #     + bias.unsqueeze(-1) * x
             # )
 

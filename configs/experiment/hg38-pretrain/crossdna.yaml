@@ -4,7 +4,7 @@ defaults:
   - override /scheduler: cosine_warmup_timm
 
 model:
-  _name_: crossdnav2 # crossdna
+  _name_: crossdna
   config:
     _target_: crossdna.configuration_crossdna.CrossDNAConfig
     pretrain: true
@@ -145,5 +145,4 @@ hydra:
     dir: ./outputs/pretrain/hg38/${now:%Y-%m-%d}/${now:%H-%M-%S-%f}
   job:
     chdir: true
-
 

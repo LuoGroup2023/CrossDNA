@@ -275,7 +275,7 @@ _BASE_TO_ID = {
 
 class NucleotideTransformerDataset(torch.utils.data.Dataset):
     """
-    CrossDNAv2-compatible nucleotide classification dataset.
+    CrossDNA-compatible nucleotide classification dataset.
 
     Key design:
     - base-level input only
@@ -324,7 +324,7 @@ class NucleotideTransformerDataset(torch.utils.data.Dataset):
 
         if (not self.use_tokenizer) and self.add_eos:
             raise ValueError(
-                "For CrossDNAv2 fine-tuning with base-level input, "
+                "For CrossDNA fine-tuning with base-level input, "
                 "set add_eos=False when use_tokenizer=False."
             )
 
@@ -369,7 +369,7 @@ class NucleotideTransformerDataset(torch.utils.data.Dataset):
 
     def _encode_direct(self, x: str):
         """
-        CrossDNAv2 native base-level encoding:
+        CrossDNA native base-level encoding:
         A/C/G/T/N -> 0/1/2/3/4
         Unknown bases are mapped to N (=4).
         """

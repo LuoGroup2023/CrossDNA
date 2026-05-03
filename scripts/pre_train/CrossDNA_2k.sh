@@ -7,9 +7,9 @@ conda activate CrossDNA
 
 export LD_LIBRARY_PATH=/data/zhaol/miniconda3/envs/CrossDNA/lib/python3.11/site-packages/nvidia/nvjitlink/lib:${LD_LIBRARY_PATH:-}
 
-cd /data/zhaol/projects/yangcheng/CrossDNAv2
+cd /data/zhaol/projects/yangcheng/CrossDNA
 
-full_path_to_root="/data/zhaol/projects/yangcheng/CrossDNAv2"
+full_path_to_root="/data/zhaol/projects/yangcheng/CrossDNA"
 
 export HYDRA_FULL_ERROR=1
 
@@ -36,7 +36,7 @@ MAX_EPOCHES=60
 RC_AUG="false"
 
 
-WANDB_NAME="CrossDNAv2_len-${SEQLEN_DIS}_blocksize-${BLOCK_SIZE}_gpus-${NUM_DEVICES}_batchsize-${BATCH_SIZE}_d_model-${D_MODEL}_depth-${Depth}_lr-${LR}_epoches-${MAX_EPOCHES}"
+WANDB_NAME="CrossDNA_len-${SEQLEN_DIS}_blocksize-${BLOCK_SIZE}_gpus-${NUM_DEVICES}_batchsize-${BATCH_SIZE}_d_model-${D_MODEL}_depth-${Depth}_lr-${LR}_epoches-${MAX_EPOCHES}"
 
 # time
 RUN_DATE=$(date +"%Y-%m-%d")
@@ -57,7 +57,7 @@ else
 fi
 
 python -m train \
-  experiment=hg38-pretrain/crossdnav2 \
+  experiment=hg38-pretrain/crossdna \
   dataset.max_length=${SEQLEN} \
   dataset.batch_size=$(( BATCH_SIZE / NUM_DEVICES )) \
   dataset.batch_size_eval=$(( BATCH_SIZE / NUM_DEVICES )) \

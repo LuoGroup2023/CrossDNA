@@ -34,7 +34,7 @@ model = {
     "mamba_transformer": "src.models.ConvNova.mamba_transformer.SSScanDNAHybridModel",
 
 
-    "crossdnav2": "src.models.CrossDNA.crossdnav2.SSScanDNAHybridModel",
+    "crossdna": "src.models.CrossDNA.crossdna.SSScanDNAHybridModel",
     
 
     # "nconvnext": "src.models.sequence.convNext.NConvNeXt",
