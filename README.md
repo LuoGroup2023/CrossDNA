@@ -18,10 +18,6 @@ Pretrained CrossDNA model variants are also available through Hugging Face.
 - [x] Source Code and Pretrained Weights on transformers.
 ---
 
-## Update
-- **2026-04-15**: The new version of CrossDNA is available in the `crossdnav2` branch.Under the same parameter setting and without changing the CrossDNA architecture, we further optimized the training process by making more efficient use of intermediate variables and improving memory utilization. These changes substantially reduced memory pressure and redundant computation during training, leading to more stable optimization and better downstream performance of CrossDNA.
-
-
 <h2>1 Quick start</h2>
 
 <h3>1.1 Clone the repo and cd CrossDNA/crossdna.</h3>
@@ -41,7 +37,7 @@ pip install --no-cache-dir triton==3.2.0
 pip install tensorflow -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip install --no-deps "selene_sdk==0.6.0"
 pip install -U cython plotly pytabix ruamel.yaml ruamel.yaml.clib seaborn statsmodels narwhals patsy
-pip install transformer pytorch-lightning==1.8.6 wandb hydra-core==1.3.2 omegaconf==2.3.0 datasets polars genomic_benchmarks liftover psutil kipoiseq pyBigWig timm
+pip install transformer pytorch-lightning==2.5.0.post0 wandb hydra-core==1.3.2 omegaconf==2.3.0 datasets polars genomic_benchmarks liftover psutil kipoiseq pyBigWig timm
 </pre>
 
 <h3>1.3 Download the data.(Pretrain)</h3>
