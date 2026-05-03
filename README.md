@@ -1,21 +1,33 @@
 # Explicit Dynamic Cross-Strand Interactions for DNA Sequence Language Modeling
 
+## Overview
+
+This repository contains the official implementation of **CrossDNA**, a DNA sequence language model designed for explicit and dynamic cross-strand representation learning. CrossDNA uses a duplex-inspired dual-branch architecture to model forward and reverse-complement DNA views, together with lightweight cross-strand communication and long-context sequence modeling modules.
+
+The repository provides source code, configuration files, pretrained model weights, and example scripts for pretraining CrossDNA, fine-tuning it on downstream genomic benchmarks, and extracting sequence-level representations. It can be used to reproduce the experiments reported in our study, train CrossDNA on custom genomic sequences, or load pretrained CrossDNA models for downstream tasks such as genomic sequence classification, enhancer prediction, chromatin profile prediction, and embedding-based analysis.
+
+Pretrained CrossDNA model variants are also available through Hugging Face.
 
 ---
 
-## Plan
-- [x] CrossDNAv2 Scripts for Pretraining, NT & Genomic Benchmarks.
+## 🚩 Plan
+- [x] Scripts for Pretraining, NT & Genomic Benchmarks.
 - [ ] Paper Released.
-- [x] [[HuggingFace]](https://huggingface.co/chengCCC/CrossDNA_pretrain/tree/main) includes variants of the CrossDNA model.
+- [x] Pretrained Weights of CrossDNA (8.1M).
+- [x] [[HuggingFace 🤗]](https://huggingface.co/chengCCC) includes variants of the CrossDNA model.
 - [x] Source Code and Pretrained Weights on transformers.
 ---
 
-<h2>1 Quick start</h2>
+## Update
+- **2026-04-15**: The new version of CrossDNA is available in the `crossdnav2` branch.Under the same parameter setting and without changing the CrossDNA architecture, we further optimized the training process by making more efficient use of intermediate variables and improving memory utilization. These changes substantially reduced memory pressure and redundant computation during training, leading to more stable optimization and better downstream performance of CrossDNA.
 
-<h3>1.1 Clone the repo.</h3>
+
+<h2>1 Quick start</h2>
+
+<h3>1.1 Clone the repo and cd CrossDNA/crossdna.</h3>
 <pre>
 git clone https://github.com/LuoGroup2023/CrossDNA.git
-cd CrossDNA
+cd CrossDNA/crossdna
 </pre>
 
 
@@ -29,7 +41,7 @@ pip install --no-cache-dir triton==3.2.0
 pip install tensorflow -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip install --no-deps "selene_sdk==0.6.0"
 pip install -U cython plotly pytabix ruamel.yaml ruamel.yaml.clib seaborn statsmodels narwhals patsy
-pip install transformer pytorch-lightning==2.5.0.post0 wandb hydra-core==1.3.2 omegaconf==2.3.0 datasets polars genomic_benchmarks liftover psutil kipoiseq pyBigWig timm
+pip install transformer pytorch-lightning==1.8.6 wandb hydra-core==1.3.2 omegaconf==2.3.0 datasets polars genomic_benchmarks liftover psutil kipoiseq pyBigWig timm
 </pre>
 
 <h3>1.3 Download the data.(Pretrain)</h3>
@@ -64,56 +76,119 @@ The final file structure (data directory) should look like
 
 ---
 
-<h2>2 Reproducing the paper</h2>
+<h2>2 Reproducing the paper</h2>
 
-<h3>2.1 Pre-training on the Human Reference Genome</h3>
+<h3>2.1 Pre-training on the Human Reference Genome</h3>
 
-<p>The recommended entry point is the pre-training script under <code>scripts/pre_train</code>. Before running, please update the environment-specific paths in the script, such as <code>conda</code>, <code>full_path_to_root</code>, and the output directory.</p>
 <pre>
-  bash scripts/pre_train/CrossDNAv2_2k.sh
+  python train.py experiment='hg38-pretrain/crossdna'
 </pre>
 
-<p>This script launches <code>experiment=hg38-pretrain/crossdnav2</code> with the default 2k pre-training setup. You can edit variables such as <code>SEQLEN</code>, <code>BLOCK_SIZE</code>, <code>BATCH_SIZE</code>, <code>D_MODEL</code>, <code>Depth</code>, <code>LR</code>, and <code>MAX_EPOCHES</code> directly in the script.</p>
-
-<h3>2.2 Genomic Benchmarks</h3>
-<p>GenomicBenchmarks provides 8 binary- and multi-class tasks packaged as a Python library.</p>
-<p>The recommended launch script is <code>scripts/benchmark/gb/gb_crossdnav2.sh</code>. Please update the checkpoint path and dataset root in the script, or pass them from the command line.</p>
+you can adjust the hyperparameters by using cmd like following, detailed hyperparameters setting can be seen in configs/experiment/xxx/xxx.yaml
 <pre>
-  bash scripts/benchmark/gb/gb_crossdnav2.sh human_enhancers_cohn
+  python train.py experiment='hg38-pretrain/crossdna' wandb=null trainer.devices=4
 </pre>
 
-<p>Optional override:</p>
+<h3>2.2 Genomic Benchmarks (short-range)</h3>
+<p>GenomicBenchmarks provides 8 binary- and multi-class tasks packaged as a Python library. </p>
+
+Remeber to adjust the setting for different dataset like max seq length.
 <pre>
-  bash scripts/benchmark/gb/gb_crossdnav2.sh human_enhancers_cohn /path/to/pretrain.ckpt /path/to/genomic_benchmark
+  python train.py experiment='genomic-benchmark/crossdna' 
 </pre>
 
-<p>An additional 408K/tiny-backbone variant is also provided:</p>
+<h3>2.3 Nucleotide Transformer Benchmark</h3>
+<p>Datasets are hosted on the Hub as <code>InstaDeepAI/nucleotide_transformer_downstream_tasks</code>. </p>
+Remeber to adjust the setting for different dataset like max seq length.
 <pre>
-  bash scripts/benchmark/gb/gb_crossdnav2_408k.sh human_enhancers_cohn /path/to/pretrain_408k.ckpt /path/to/genomic_benchmark
+  python train.py experiment='nt-benchmark/crossdna'
 </pre>
-
-<p>Task-specific <code>MAX_LENGTH</code>, <code>BATCH_SIZE</code>, and <code>LR</code> are selected automatically inside the script according to <code>DATASET_NAME</code>.</p>
-
-<h3>2.3 Nucleotide Transformer Benchmark</h3>
-<p>Datasets are hosted on the Hub as <code>InstaDeepAI/nucleotide_transformer_downstream_tasks</code>.</p>
-<p>The recommended launch script is <code>scripts/benchmark/nt/nt_crossdnav2.sh</code>. Please update the checkpoint path and dataset root in the script, or pass them from the command line.</p>
-<pre>
-  bash scripts/benchmark/nt/nt_crossdnav2.sh H3K4me3
-</pre>
-
-<p>Optional override:</p>
-<pre>
-  bash scripts/benchmark/nt/nt_crossdnav2.sh H3K4me3 /path/to/pretrain.ckpt /path/to/nucleotide_transformer
-</pre>
-
-<p>Task-specific <code>BATCH_SIZE</code> and <code>LR</code> are configured inside the script for each NT dataset.</p>
 
 ---
 
+<h2>3 Model Loading and Testing</h2>
 
 
+<pre>
+import os
+os.environ.setdefault("DISABLE_TORCH_COMPILE", "1")  
 
-<h2>3 The dataset for downstream tasks.</h2>
+import torch
+if hasattr(torch, "compile"):
+    def _no_compile(fn=None, *args, **kwargs):
+        if fn is None:
+            def deco(f): return f
+            return deco
+        return fn
+    torch.compile = _no_compile
+
+from transformers import AutoModelForMaskedLM, AutoTokenizer
+
+MODEL_DIR = "/home/zhaol/projects/huggingface_crossdna/crossdna_inference" # This directory must contain either the `model.safetensors` or `pytorch_model.bin` file.
+
+tok = AutoTokenizer.from_pretrained(MODEL_DIR, trust_remote_code=True, local_files_only=True)
+model = AutoModelForMaskedLM.from_pretrained(MODEL_DIR, trust_remote_code=True, local_files_only=True)
+model.eval()
+
+# ---- Device Selection
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
+
+# ---- Base mapping (logits indexed 0..4 <-> A/C/G/T/N)
+labels = ["A", "C", "G", "T", "N"]
+base_map = {ch: i for i, ch in enumerate(labels)}
+
+def dna_to_base_ids(seq: str, device=None):
+    t = torch.tensor([base_map.get(ch.upper(), base_map["N"]) for ch in seq], dtype=torch.long)
+    return t.to(device) if device is not None else t
+
+# ========== Test (MaskedLM Forward) ==========
+x = torch.full((2, 16), base_map['N'], dtype=torch.long, device=device)
+mask_id = getattr(model.config, "mask_token_id", 3)
+x[:, 3] = mask_id
+x[:, 9] = mask_id
+
+with torch.no_grad():
+    out = model(input_ids=x)
+
+logits = out.logits.detach().cpu()
+print("logits.shape =", tuple(logits.shape))
+
+dna = "TGATGTGACTCACATAGGCGGTGGCGTGATATGTTGTGACTCATTTCCCGGAAACGGATGACTAATGCCATATGTTATCAGTTTCCTGGAAATTTGATCACGCCATATTGTGAAATCATGCGATTCCCGGATCACGTGACGGCCGGACGTGACAAGTATGAGTCACTAAGTGGCGTGATCTTACGAATCACGTGATGGTCAATGTCACGTGATCGGCTGGTGAGTCAGCAATATCGTGTGATTCATTC"
+inp = dna_to_base_ids(dna, device=device).unsqueeze(0)
+with torch.no_grad():
+    out2 = model(input_ids=inp)
+pred2 = out2.logits.argmax(dim=-1).squeeze(0).cpu().tolist()
+print("argmax base:", "".join(labels[i] for i in pred2))
+
+# ==========  Representations (Embedding) ==========
+
+max_len_cfg = getattr(model.config, "max_position_embeddings", 1024)
+max_length = int(min(512, max_len_cfg))  # You can change it to a longer value, but do not exceed max_position_embeddings.
+
+# 2) Construct sample DNA text with base IDs (note: not tokenizer IDs)
+sequence = "ACTG" * (max_length // 4)
+seq_base = dna_to_base_ids(sequence, device=device).unsqueeze(0)  # [1, L] in 0..4
+
+# 3) Temporarily switch the backbone to “characterization mode”.
+was_pretrain = getattr(model.backbone, "pretrain", False)
+was_for_repr = getattr(model.backbone, "for_representation", False)
+model.backbone.pretrain = False                 # Let Backbone accept a single sequence
+model.backbone.for_representation = True        # Let forward return the fused representation.
+
+with torch.inference_mode():
+    embeddings, _ = model.backbone(seq_base)    # [B, L, H]
+embeddings_cpu = embeddings.detach().cpu()
+print("embeddings.shape =", tuple(embeddings_cpu.shape))
+
+# 4) Restore original settings
+model.backbone.pretrain = was_pretrain
+model.backbone.for_representation = was_for_repr
+
+</pre>
+
+
+<h2>4 The dataset for downstream tasks.</h2>
 
 All data used in this study were obtained from publicly available datasets.
 
@@ -132,6 +207,6 @@ For the experiment evaluating the generalization performance of enhancers, mouse
 To benchmark the embedding quality of DNA foundation models, we used the DNA Foundation Benchmark dataset, available at: [https://huggingface.co/datasets/hfeng3/dna_foundation_benchmark_dataset/tree/main](https://huggingface.co/datasets/hfeng3/dna_foundation_benchmark_dataset/tree/main).
 
 
-## Contact
-  - **Cheng Yang**: [yangchengyjs@hnu.edu.cn](mailto:[yangchengyjs@hnu.edu.cn)
+## Contact  
+  - **Cheng Yang**: [yangchengyjs@hnu.edu.cn](mailto:[yangchengyjs@hnu.edu.cn)   
   College of Computer Science and Electronic Engineering, Hunan University, Changsha
