@@ -74,6 +74,8 @@ The final file structure (data directory) should look like
 
 <h2>2 Reproducing the paper</h2>
 
+<p>The <code>Figure_Data_Reproduction</code> directory contains the source data used to reproduce the figures in the paper.</p>
+
 <h3>2.1 Pre-training on the Human Reference Genome</h3>
 
 <p>The recommended entry point is the pre-training script under <code>scripts/pre_train</code>. Before running, please update the environment-specific paths in the script, such as <code>conda</code>, <code>full_path_to_root</code>, and the output directory.</p>
